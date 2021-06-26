@@ -26,7 +26,7 @@ JNIEXPORT jstring JNICALL Java_com_sohu_ping_NativeMethodHelper_ping
         return NULL;
     }
 
-    pri_debug("convert string: %s\n", domain);
+    pri_debug("domain convert string: %s\n", domain);
     memset(res_buffer, 0, PING_RES_BUFFER_LEN);
 
     get_ping_result(domain, 4, res_buffer, PING_RES_BUFFER_LEN);

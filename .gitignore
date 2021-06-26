@@ -56,7 +56,6 @@ buildtools/mapping.txt
 buildtools/seeds.txt
 buildtools/usage.txt
 .DS_Store
-
 ### Android freeline files2 ###
 freeline/
 freeline_core
@@ -68,3 +67,4 @@ Users/
 *.local_bak
 
 app/.externalNativeBuild
+.cxx

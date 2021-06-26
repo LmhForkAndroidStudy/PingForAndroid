@@ -7,7 +7,7 @@ import android.util.Log;
  */
 public class LogUtils {
     private static boolean isShowLog = true;
-    private static final String DEFAULT_TAG = "ping";
+    private static final String DEFAULT_TAG = "my_ping";
 
     public static void i(String tag, String message) {
         if (isShowLog) {

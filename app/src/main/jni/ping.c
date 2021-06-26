@@ -165,10 +165,8 @@ static void * send_imcp(void *arg)
             pri_error("PING: sendto: Network is unreachable\n");
             continue;
         }
-
         sleep(1);
     }
-
     *flag = 0;
     return NULL;
 }
@@ -218,6 +216,8 @@ static void * recv_imcp(void *arg)
     long read_length;
     char recv_buf[MAX_RECV_SIZE];
     struct timeval end;
+  //  pri_error("PING: sendto: Network is unreachable  test ");
+
 
     from_packet_len = sizeof(struct sockaddr_in);
     for (int index = 0; index < times && *flag == 1;)
@@ -234,7 +234,7 @@ static void * recv_imcp(void *arg)
             //icmp_header * recv_icmp_header = (icmp_header *)(recv_buf +
             //    (recv_ip_header->ip_head_verlen & 0x0F) * 4);
 
-            //pri_debug("id: %d, seq: %d\n", recv_icmp->icmp_header.icmp_id, recv_icmp->icmp_header.icmp_seq);
+         //   pri_debug("id: %d, seq: %d\n", recv_icmp->icmp_header.icmp_id, recv_icmp->icmp_header.icmp_seq);
             if(recv_icmp->icmp_header.icmp_type != 0)
             {
                 pri_error("error type %d received, error code %d \n", recv_icmp->icmp_header.icmp_type, recv_icmp->icmp_header.icmp_code);
@@ -256,11 +256,14 @@ static void * recv_imcp(void *arg)
             if(read_length >= (0 + sizeof(ICMP_PACKET)))
             {
                 index++;
+           //     pri_error("PING: sendto: Network is unreachable  test %d",  thread_data->buffer_len);
+            //   memset(thread_data->buffer, 0, thread_data->buffer_len);
+
                 snprintf(thread_data->buffer, thread_data->buffer_len, "%s%ld bytes from (%s): icmp_seq=%d time=%.2f ms\n",
                  thread_data->buffer, read_length, inet_ntoa(from.sin_addr),
                  recv_icmp->icmp_header.icmp_seq / 256, get_time_interval(&recv_icmp->icmp_time, &end));
 
-                pri_debug("%ld bytes from (%s): icmp_seq=%d ttl=%d time=%.2f ms\n",
+                pri_debug("i:%d, %ld bytes from (%s): icmp_seq=%d ttl=%d time=%.2f ms\n", index,
                           read_length, inet_ntoa(from.sin_addr), recv_icmp->icmp_header.icmp_seq / 256,
                           ip_ttl, get_time_interval(&recv_icmp->icmp_time, &end));
             }
@@ -324,7 +327,7 @@ BOOL get_ping_result(const char * domain, u_int32_t times, char * res_buffer, in
         pri_error("socket error: %s!\n", strerror(errno));
         return ret;
     }
-
+    pri_debug("setsocketopt SO_RCVTIMEO SOCK_DGRAM:");
     timeout.tv_sec = 5;
     timeout.tv_usec = 0;
     setsockopt(client_fd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
@@ -339,7 +342,7 @@ BOOL get_ping_result(const char * domain, u_int32_t times, char * res_buffer, in
         pri_error("setsockopt SO_SNDTIMEO error: %s\n", strerror(errno));
         return ret;
     }
-
+    pri_debug("setsocketopt SO_RCVTIMEO setsockopt:  000 ");
     memset(dest_socket_addr.sin_zero, 0, sizeof(dest_socket_addr.sin_zero));
     dest_socket_addr.sin_family = AF_INET;
     dest_socket_addr.sin_addr.s_addr = dest_ip;
@@ -360,8 +363,12 @@ BOOL get_ping_result(const char * domain, u_int32_t times, char * res_buffer, in
     icmp_header->icmp_id = getpid();
 
     icmp_packet->icmp_sum_flag = generation_checksum((u_int16_t *)icmp_packet, sizeof(ICMP_PACKET));
-    pri_debug("PING %s (%s).\n", domain, inet_ntoa(*((struct in_addr*)&dest_ip)));
-    snprintf(res_buffer, buffer_len, "PING %s (%s).\n", domain, inet_ntoa(*((struct in_addr*)&dest_ip)));
+    char * aaa = inet_ntoa(*((struct in_addr*)&dest_ip));
+    pri_debug("PING %s (%s).  -- len:%d", domain, aaa, strlen(aaa));
+
+    snprintf(res_buffer, buffer_len, " ---- PING %s (%s)", domain, aaa);
+
+    pri_debug("PING buffer_len %d  -- %s-----%d ", buffer_len, res_buffer, strlen(res_buffer));
 
     thread_data.send_flag   = 1;
     thread_data.sockaddr    = &dest_socket_addr;
@@ -369,6 +376,9 @@ BOOL get_ping_result(const char * domain, u_int32_t times, char * res_buffer, in
     thread_data.buffer      = res_buffer;
     thread_data.times       = times;
     thread_data.icmp_packet = icmp_packet;
+    thread_data.buffer_len = buffer_len;
+
+    pri_debug("PING buffer_len %d --- -- 0000  ", buffer_len);
 
     ret = pthread_create(&send_pid, NULL, send_imcp, (void *)&thread_data);
     if (ret < 0)
@@ -384,6 +394,7 @@ BOOL get_ping_result(const char * domain, u_int32_t times, char * res_buffer, in
         pthread_detach(send_pid);
         goto FAIL_EXIT;
     }
+    pri_debug("PING buffer_len %d -  -- 1111  ", buffer_len);
 
     pthread_join(send_pid, NULL);
     pthread_join(recv_pid, NULL);

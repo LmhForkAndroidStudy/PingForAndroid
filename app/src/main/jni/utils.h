@@ -6,7 +6,7 @@
 #ifdef __ANDROID__
 #include <jni.h>
 #include <android/log.h>
-#define TAG "ping"
+#define TAG "my_ping"
 #define pri_debug(format, args...) __android_log_print(ANDROID_LOG_DEBUG, TAG, "[%s:%d]" format, basename(__FILE__), __LINE__, ##args)
 #define pri_error(format, args...) __android_log_print(ANDROID_LOG_DEBUG, TAG, "[%s:%d]" format, basename(__FILE__), __LINE__, ##args)
 
