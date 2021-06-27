@@ -263,6 +263,8 @@ static void * recv_imcp(void *arg)
                  thread_data->buffer, read_length, inet_ntoa(from.sin_addr),
                  recv_icmp->icmp_header.icmp_seq / 256, get_time_interval(&recv_icmp->icmp_time, &end));
 
+              //  pri_error("inet_ntoa %s",  inet_ntoa(thread_data->sockaddr->sin_addr));
+
                 pri_debug("i:%d, %ld bytes from (%s): icmp_seq=%d ttl=%d time=%.2f ms\n", index,
                           read_length, inet_ntoa(from.sin_addr), recv_icmp->icmp_header.icmp_seq / 256,
                           ip_ttl, get_time_interval(&recv_icmp->icmp_time, &end));
